@@ -23,45 +23,55 @@ colors = [Red, Green, Blue, Yellow, Orange, Purple]
 
 -- Get the number of exact matches between the actual code and the guess
 exactMatches :: Code -> Code -> Int
-exactMatches actualCode guess = length(filter (\p -> fst p == snd p) (zip actualCode guess))
+exactMatches actualCode guess = length . filter (\p -> fst p == snd p) $ zip actualCode guess
 
 -- Exercise 2 -----------------------------------------
 
 -- For each peg in xs, count how many times is occurs in ys
 countColors :: Code -> [Int]
-countColors code = map (countColor code) colors
-
-countColor :: Code -> Peg -> Int
-countColor code color = length $ filter (\c -> c == color) code
+countColors code = map (countColor) colors
+                  where countColor color = length $ filter (\c -> c == color) code
 
 -- Count number of matches between the actual code and the guess
 matches :: Code -> Code -> Int
-matches actual guess = foldl (+) 0 countMin zip countColors actual countColors guess
-
-countMin :: (Int, Int) -> Int
-countMin countPair = min (fst countPair) (snd countPair)
-
+matches actual guess = sum $ map (\pair -> countMin pair) $ zip (countColors actual) (countColors guess)
+                       where countMin countPair = uncurry (min) countPair
 
 -- Exercise 3 -----------------------------------------
 
 -- Construct a Move from a guess given the actual code
 getMove :: Code -> Code -> Move
-getMove = undefined
+getMove actual guess = let exactMatch = exactMatches actual guess in
+                       let nonExactMatch = matches actual guess in
+                       Move guess exactMatch (nonExactMatch - exactMatch)
 
 -- Exercise 4 -----------------------------------------
 
 isConsistent :: Move -> Code -> Bool
-isConsistent = undefined
+isConsistent providedMove code = moveExactMatch providedMove == moveExactMatch moveFromCode && moveNonExactMatch providedMove == moveNonExactMatch moveFromCode
+                               where moveFromCode = getMove (moveCode providedMove) code
+
+moveCode :: Move -> Code
+moveCode (Move code _ _) = code
+
+moveExactMatch :: Move -> Int
+moveExactMatch (Move _ x _) = x
+
+moveNonExactMatch :: Move -> Int
+moveNonExactMatch (Move _ _ y) = y
+
 
 -- Exercise 5 -----------------------------------------
 
 filterCodes :: Move -> [Code] -> [Code]
-filterCodes = undefined
+filterCodes move codes = filter (isConsistent move) codes
 
 -- Exercise 6 -----------------------------------------
 
 allCodes :: Int -> [Code]
-allCodes = undefined
+allCodes 0 = []
+allCodes 1 = map (\a -> a:[]) colors
+allCodes len = []
 
 -- Exercise 7 -----------------------------------------
 

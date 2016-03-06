@@ -70,8 +70,9 @@ filterCodes move codes = filter (isConsistent move) codes
 
 allCodes :: Int -> [Code]
 allCodes 0 = []
-allCodes 1 = map (\a -> a:[]) colors
-allCodes len = []
+allCodes 1 = map (\color -> color:[]) colors
+allCodes len = concatMap (\code -> map (code:) $ allCodes (len - 1)) colors
+
 
 -- Exercise 7 -----------------------------------------
 

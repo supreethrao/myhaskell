@@ -60,12 +60,15 @@ ex5Tests = [
 
 -- Exercise 6 -----------------------------------------
 
+testAllCodes :: (Int, Int) -> Bool
+--testAllCodes expected = (length . allCodes . fst $ expected) == snd expected
+testAllCodes expected = uncurry (verify) expected
+                        where verify a b = (length . allCodes $ a) == b
+
 ex6Tests :: [Test]
 ex6Tests = [
-            testF1 "allCodes test" allCodes
-             [ (0, [])
-             ,
-             (1, [[Red], [Green], [Blue], [Yellow], [Orange], [Purple]])]
+            Test "allCodes test" testAllCodes
+             [ (0, 0) , (1, 6), (2, 36), (3, 216)]
            ]
 
 -- Exercise 7 -----------------------------------------

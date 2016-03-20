@@ -48,18 +48,8 @@ getMove actual guess = let exactMatch = exactMatches actual guess in
 -- Exercise 4 -----------------------------------------
 
 isConsistent :: Move -> Code -> Bool
-isConsistent providedMove code = moveExactMatch providedMove == moveExactMatch moveFromCode && moveNonExactMatch providedMove == moveNonExactMatch moveFromCode
-                               where moveFromCode = getMove (moveCode providedMove) code
-
-moveCode :: Move -> Code
-moveCode (Move code _ _) = code
-
-moveExactMatch :: Move -> Int
-moveExactMatch (Move _ x _) = x
-
-moveNonExactMatch :: Move -> Int
-moveNonExactMatch (Move _ _ y) = y
-
+isConsistent (Move pm pex pnex) code = pex == cex && pnex == cnex
+                              where (Move _ cex cnex) = getMove pm code
 
 -- Exercise 5 -----------------------------------------
 
@@ -69,7 +59,8 @@ filterCodes move codes = filter (isConsistent move) codes
 -- Exercise 6 -----------------------------------------
 
 allCodes :: Int -> [Code]
-allCodes 0 = []
+allCodes n
+        | n <= 0 = []
 allCodes 1 = map (\color -> color:[]) colors
 allCodes len = concatMap (\code -> map (code:) $ allCodes (len - 1)) colors
 
@@ -77,7 +68,16 @@ allCodes len = concatMap (\code -> map (code:) $ allCodes (len - 1)) colors
 -- Exercise 7 -----------------------------------------
 
 solve :: Code -> [Move]
-solve = undefined
+solve secret = loop [getMove secret $ replicate len Red]
+             where
+                len = length secret
+                _allCodes = allCodes len
+                allConsistent ms c = all (`isConsistent` c) ms
+                nextMove ms = getMove secret $ head $ filter (allConsistent ms) $ _allCodes
+                loop [] = []
+                loop ms@(Move _ e _ : _)
+                      | e == len = ms
+                      | otherwise    = loop (nextMove ms : ms)
 
 -- Bonus ----------------------------------------------
 
